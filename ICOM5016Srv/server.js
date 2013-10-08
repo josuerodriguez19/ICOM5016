@@ -155,8 +155,7 @@ app.get('/ICOM5016Srv/bidHistory', function(req, res) {
 
 app.get('/ICOM5016Srv/product/:id', function(req, res) {
 	var id = req.params.id;
-		console.log("hello ramon!");
-
+		
 	if ((id < 0) || (id >= productNextId)){
 		// not found
 		res.statusCode = 404;
@@ -271,7 +270,7 @@ app.post('/ICOM5016Srv/user1', function(req, res) {
 
   	var newUser = new User(req.body.firstname, req.body.lastname, req.body.email, req.body.mail, "","","","","");
   	newUser.id = userNextId++;
-  	console.log("New LOL: " + JSON.stringify(newUser));
+  
   	userList.push(newUser);
   	res.json(true);
 });
@@ -290,7 +289,7 @@ app.post('/ICOM5016Srv/user2', function(req, res) {
 	currentCar.password = req.body.password;
 	userList.push(currentCar);
 
-  	console.log("New LOL: " + JSON.stringify(currentCar));
+  
   	res.json(true);
 });
 
@@ -309,7 +308,7 @@ app.post('/ICOM5016Srv/user3', function(req, res) {
 	currentCar.CCinfo = req.body.CCinfo;
 	userList.push(currentCar);
 
-  	console.log("New LOL: " + JSON.stringify(currentCar));
+
   	res.json(true);
 });
 
@@ -354,7 +353,7 @@ console.log("PUT user: " + id);
 
 if ((id < 0) || (id >= userNextId)){
 // not found
-console.log("1");
+
 res.statusCode = 404;
 res.send("User not found.");
 }
@@ -362,25 +361,25 @@ else if(!req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('mail')
   || !req.body.hasOwnProperty('password') || !req.body.hasOwnProperty('accountNumber') || !req.body.hasOwnProperty('billingAddress') 
   || !req.body.hasOwnProperty('CCinfo')) {
     res.statusCode = 400;
-    console.log("2");
+   
     return res.send('Error: Missing fields for user.');
   }
 else {
 var target = -1;
 for (var i=0; i < userList.length; ++i){
 if (userList[i].id == id){
-console.log("3");
+
 target = i;
 break;	
 }
 }
 if (target == -1){
 res.statusCode = 404;
-console.log("4");
+
 res.send("User not found.");	
 }	
 else {
-console.log("5");
+
 var theUser= userList[target];
 theUser.email = req.body.email;
 theUser.mail = req.body.mail;
@@ -469,12 +468,11 @@ console.log("server listening");
 
 
 app.post('/ICOM5016Srv/rating', function(req, res) {
-    console.log("rating the damn user");
-
+  
       if(!req.body.hasOwnProperty('radio')) {
         res.statusCode = 400;
         console.log(req.body.radio);
-        console.log("huehuehuehuehue");
+    
         return res.send('Error: Missing fields for user.');
       }
 

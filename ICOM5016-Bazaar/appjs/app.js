@@ -20,9 +20,41 @@ function addToCart(){
     alert("The product was added to your shopping cart!");
 }
 
+function removeFromCart(id){
+	document.location.href = "#cart_page";
+
+	for(var i=0; i < shoppingCartIDs.length; i++) {
+	
+		if(shoppingCartIDs[i].id == id){
+			shoppingCartIDs.splice(i,1);
+			break;
+		}
+			//shoppingCartIDs.pop();
+
+	}
+	
+	  var productList = shoppingCartIDs;
+      var len = productList.length;
+	  var list = $("#cartlist");
+            list.empty();
+            var product;
+            for (var i=0; i < len; ++i){
+                product = productList[i];
+               list.append("<li><a onclick=viewProduct(" + product.id + ")>" + 
+					"<h2>" + product.pName + " " + product.brand +  "</h2>" + "<img src="+product.photo+" />" + 
+					"<p>" + product.model + "</p>" +
+					"<p><strong> Condition: </strong></p>" + 
+					"<p class=\"ui-li-aside\">" + "$" + product.iPrice + " <br>"+ "$" + product.bPrice+ "</p>" +
+					"</a><a onclick=removeFromCart(" + product.id + ") data-icon=remove></a></li>");
+            }
+            list.listview("refresh");    
+	$.mobile.navigate("#cart_page");
+}
+
 
 //shows the list of products in your cart
 $(document).on('pagebeforeshow', "#cart_page", function( event, ui ) {
+			$.mobile.changePage.defaults.allowSamePageTransition = true;
             var productList = shoppingCartIDs;
             var len = productList.length;
             var list = $("#cartlist");
@@ -30,7 +62,12 @@ $(document).on('pagebeforeshow', "#cart_page", function( event, ui ) {
             var product;
             for (var i=0; i < len; ++i){
                 product = productList[i];
-                list.append("<li><a onclick=viewProduct("+ product.id +")>"+ product.pName + "</a></li>");
+               list.append("<li><a onclick=viewProduct(" + product.id + ")>" + 
+					"<h2>" + product.pName + " " + product.brand +  "</h2>" + "<img src="+product.photo+" />" + 
+					"<p>" + product.model + "</p>" +
+					"<p><strong> Condition: </strong></p>" + 
+					"<p class=\"ui-li-aside\">" + "$" + product.iPrice + " <br>"+ "$" + product.bPrice+ "</p>" +
+					"</a><a onclick=removeFromCart(" + product.id + ") data-icon=remove></a></li>");
             }
             list.listview("refresh");    
 });
@@ -74,7 +111,7 @@ function Browse(categoryID){
 			console.log("textStatus: " + textStatus);
 			$.mobile.loading("hide");
 			if (data.status == 404){
-				alert("Category not found. lol");
+				alert("Category not found.");
 			}
 			else {
 				alert("Internal Server Error.");
@@ -100,7 +137,7 @@ function viewBidHistory(){
 			console.log("textStatus: " + textStatus);
 			$.mobile.loading("hide");
 			if (data.status == 404){
-				alert("Category not found. lol");
+				alert("Category not found.");
 			}
 			else {
 				alert("Internal Server Error.");
@@ -152,7 +189,7 @@ function viewProduct(id){
 			console.log("textStatus: " + textStatus);
 			$.mobile.loading("hide");
 			if (data.status == 404){
-				alert("Category not found. lol");
+				alert("Category not found.");
 			}
 			else {
 				alert("Internal Server Error.");
@@ -664,7 +701,7 @@ $(document).on('pagebeforeshow', "#bid_history", function( event, ui ) {
 
 
 $(document).on('pagebeforeshow', "#checkOut_page", function( event, ui ) {
-    alert("cart_invoice");
+
     var list1 = $("#adress_cart");
     list1.empty();
     list1.append(currentUser.billingAddress);
@@ -688,7 +725,7 @@ $(document).on('pagebeforeshow', "#checkOut_page", function( event, ui ) {
 });
 
 $(document).on('pagebeforeshow', "#BIN_invoice", function( event, ui ) {
-    alert("BIN_invoice");
+ 
     var list1 = $("#adress_BIN");
     list1.empty();
     list1.append(currentUser.billingAddress);
@@ -714,7 +751,7 @@ $.mobile.loading("show");
     var formData = form.serializeArray();
     var newCar = ConverToJSON(formData);
     var newCarJSON = JSON.stringify(newCar);
-    alert("rating userlol");
+   
     $.ajax({
         url : "http://localhost:3412/ICOM5016Srv/rating",
         method: 'post',
