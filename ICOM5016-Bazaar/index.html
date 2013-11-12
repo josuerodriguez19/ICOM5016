@@ -1,4 +1,4 @@
-S<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<title>RamonBay</title>
@@ -15,6 +15,7 @@ S<!DOCTYPE html>
 		<script src="appjs/category.js"></script>
 	</head>
 	<body>
+
 
 <!--//page 1 Welcome page -->
 
@@ -45,6 +46,9 @@ S<!DOCTYPE html>
 			
 			</div>
 			
+			<div class="ui-block-b"><a data-role="button" href="#cars">Guest</a></div>
+
+
 			
 			<div data-role="footer" data-theme="b" data-position="fixed">				
 				
@@ -53,6 +57,19 @@ S<!DOCTYPE html>
 			
 			
 		</div>
+		
+<div id ="cars" data-role="page">
+			<div data-role="header" data-theme="b" data-position="fixed">
+				<h1>Cars</h1>
+				<a data-role="button" data-icon="add" data-iconpos="notext" href="#add-car"></a>
+			</div>
+			<div data-role="content">
+				<h3 style="text-align: center">Cars for Sales</h3>	
+				<ul id="cars-list" data-role="listview" data-inset="true">
+				</ul>
+			</div>
+		</div>
+
 		
 <!--page 2 Register Form-->
 		
@@ -159,13 +176,15 @@ S<!DOCTYPE html>
 			
 			<div data-role="content">		
 				
-				<ul data-role="listview" id="cartlist" >
+				<ul data-role="listview" id="cartlist" data-icon="false" >
 				
 				</ul>
 
 				
 			</div>
-			
+			<div>
+				<a data-role="button" href = "#order_shopping_cart"">Order</a>
+			</div>
 			<div data-role="footer" data-theme="b" data-position="fixed">				
 				<div data-role="navbar">
 					<ul>	
@@ -173,14 +192,123 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
 			
 			
 	</div>
-	
+
+	<!--order shopping cart page-->
+	<div id = "order_shopping_cart" data-role= "page">
+			<div data-role="header" data-theme="b" data-position="fixed">
+				<h1>Order</h1>
+			</div>
+				
+				<div data-role="content">		
+				
+				<ul data-role="listview" data-inset="true" id="listview_cart" data-icon="false">
+				
+				</ul>
+
+				
+				</div>
+
+				<div data-role="content">
+
+					<div data-role="collapsible" data-content-theme="c" data-theme="a">
+						<h3> Payment Options</h3>
+							
+
+						<form id="payment_option_form_cart">
+                   			<fieldset id="temp_cart" data-role="controlgroup">
+                         
+                    		</fieldset>
+           	 			</form>
+
+
+					</div>
+
+					<div data-role="collapsible" data-content-theme="c" data-theme="a">
+						<h3> Shipping Adresses </h3>
+						<ul data-role="listview" id="shippingAdresses_cart" data-icon="false">
+						</ul>
+						
+					</div>
+
+					<a data-role="button" href="#invoice_page_cart">Continue</a>
+
+					<center><div>
+                		<p id="adress_user_profile_cart"></p>   
+                	
+            		</div></center>
+						
+				</div>
+				
+			<div data-role="footer" data-theme="b" data-position="fixed">				
+				<div data-role="navbar">
+					<ul>	
+						<li><a href="#home_page" data-icon="home"> Home </a></li>	
+						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
+						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
+						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
+					</ul>
+				</div>
+			</div>	
+
+
+	</div>
+	<!--end order shooping cart page-->
+
+
+
+<!--invoice shopping cart page-->
+<div id="invoice_page_cart" data-role="page"> 
+			
+				<div data-role="header" data-theme="b" data-position="fixed">
+					<h1>Invoice</h1>
+					
+				</div>
+				
+				
+				<div data-role="content">
+					<ul data-role="listview" data-inset="true" id = "invoice_cartlist" data-icon="false" >
+						<!--<li id="invoiceid"></li>
+						<li id="productname_invoice"></li>
+						<li id="pinstantprice_invoice"></li>
+						<li id="invoice_date"></li>
+						<li id="due_date"></li>
+						<li id="payment_invoice"></li>
+						<li id="billingAdress_invoice"></li> 
+						<li id="shippingAdress_invoice"></li> -->
+						
+					</ul>
+						<a data-role="button" href="#therating_page">Purchase</a>
+				</div>
+				
+				<!--<div data-role = "content">
+					<a data-role="button" href="#therating_page">Purchase</a>
+				</div>-->
+
+			<div data-role="footer" data-theme="b" data-position="fixed">				
+				<div data-role="navbar">
+					<ul>	
+						<li><a href="#home_page" data-icon="home"> Home </a></li>	
+						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
+						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
+						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
+					</ul>
+				</div>
+			</div>	
+							
+		</div>	
+<!--end invoice shopping cart-->
+
+
+
 	<div id="bid_history" data-role="page">
 			<div data-role="header" data-theme="b" data-position="fixed">
 				
@@ -190,7 +318,7 @@ S<!DOCTYPE html>
 			
 			<div data-role="content">		
 				
-				<ul data-role="listview" id="history" data-inset="true">
+				<ul data-role="listview" id="bidHistory" data-inset="true" data-icon="false">
 					
 				
 				</ul>
@@ -205,7 +333,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -236,7 +364,7 @@ S<!DOCTYPE html>
 			
 			<div>
 				
-			<a data-role="button"data-mini="true" onclick="authenticate()">Sign in</a>
+			<a data-role="button"data-mini="true" onclick="authenticateNew()">Sign in</a>
 				
 			</div>
 			
@@ -359,7 +487,7 @@ S<!DOCTYPE html>
 			</div>
 		</div>	
 
-<!--added by Hector-->
+<!--added by Hector new code added-->
 		<div id="View_Report" data-role="page">
 				<div data-role="header" data-theme="b" data-position="fixed">
 					<a href="#mypanel" data-role="button" data-icon="flag">Home</a>
@@ -372,9 +500,26 @@ S<!DOCTYPE html>
 					<form id="ViewReport_form">
  						<fieldset data-role="controlgroup">
  							<ul>
-				<label for="Day_Report">Day:<input id="Day_Report" name="Day_Report" type="text"/></label>
-				<label for="Week_Report">Week:<input id="Week_Report" name="Week_Report" type="text"/></label>
-				<label for="Month_Report">Month:<input id="Month_Report" name="Month_Report" type="text"/></label>
+				<label for="Day_Report">Enter Day:<input id="Day_Report" name="Day_Report" type="text"/></label>
+				<label for="Month_Report">Enter Month:<input id="Month_Report" name="Month_Report" type="text"/></label>
+				<label for="Year_Report">Enter Year:<input id="Year_Report" name="Year_Report" type="text"/></label>
+				
+	     <center>	
+			<h2>Select View report by day, week or month <h2>
+                    <fieldset data-role="controlgroup" data-type = "vertical">
+                         <label for="day">View Report By Day<input type="radio" name="radio" id="day" value="day" checked = "checked"/></label>
+
+                         <input type="radio" name="radio" id="week" value="week"/>
+                         <label for="week">View Report By Week</label>
+
+                         <input type="radio" name="radio" id="month" value="month"/>
+                         <label for="month">View Report By Month</label>
+
+                    </fieldset>
+            </center>
+				
+				
+
   				  
   			  				</ul>
 
@@ -382,9 +527,9 @@ S<!DOCTYPE html>
 					</form>		
 
 				<div class="ui-grid-b">
-				<div class="ui-block-a"><a data-role="button" onclick="GetReport()">Total Sales</a></div>
-				<div class="ui-block-b"><a data-role="button" onclick="GetReport()">Total Sales by Product</a></div>
-				<div class="ui-block-c"><a data-role="button" onclick="GetReport()">Total Revenue by Product</a></div>	
+				<div class="ui-block-a"><a data-role="button" onclick="GetTotalSales()" data-mini="true">Total Sales</a></div>
+				<div class="ui-block-b"><a data-role="button" onclick="GetTotalSalesProduct()" data-mini="true">Total Sales by Product</a></div>
+				<div class="ui-block-c"><a data-role="button" onclick="GetTotalRevenueProduct()" data-mini="true">Total Revenue by Product</a></div>	
 			</div>
 			
 						
@@ -392,21 +537,38 @@ S<!DOCTYPE html>
 		</div>	
 
 
-<!--added by Hector-->
+<!--added by Hector new code added-->
 		<div id="TotalSales_Report" data-role="page">
 				<div data-role="header" data-theme="b" data-position="fixed">
 					<a href="#mypanel" data-role="button" data-icon="flag">Home</a>
 					<a data-role="button" data-icon="shopping-cart" data-iconpos="notext" href="#welcome_page"></a>
-					<h1>Total Sales</h1>
+					<h1>Report</h1>
 				</div>
 			
-				<div data-role="content">	
-				<h3 style="text-align: center">Total Sales Report</h3>	
-				<ul id="TotalSales-list" data-role="listview" data-inset="true">
-  				  	<li>Total Sales:<input id="Total_Sales" name="Total_Sales" type="text"/></label></li>
-					<li>Total Sales By Product:<input id="Total_Sales" name="Total_Sales" type="text"/></label></li>
-					<li>Total Revenue By Product:<input id="Total_Sales" name="Total_Sales" type="text"/></label></li>
-				</ul>
+				<div data-role="content" id="reports">
+				
+				</div>
+
+				<div data-role="content" style="text-align: center">		
+				
+				<!--<ul data-role="listview" id="saleslist" >
+
+				</ul>-->
+				
+				<center class=ui-grid-a id = "saleslist" >
+
+     				 	<!--<div class="ui-block-a ui-bar-b">Header 1</div>
+
+      					<div class="ui-block-b ui-bar-b">Header 2</div>
+
+      					<div class="ui-block-a ui-bar-d">Element 1.1</div>
+
+      					<div class="ui-block-b ui-bar-d">Element 2.1</div>   style="vertical-align: middle"-->
+
+
+   			      </center>
+				
+			
 			</div>
 </div>	
 
@@ -419,10 +581,7 @@ S<!DOCTYPE html>
 			
 				<div data-role="header" data-theme="b" data-position="fixed">
 					<h1 id="home"></h1>
-					<a data-role="button" onclick="signOut()" data-icon="long-arrow-left">Sign Out</a>
-					
-					<!--added by Hector-->
-                    <a data-role="button" href="#bids_listPage" data-icon="long-arrow-left">View Bids</a>
+					<a data-role="button" onclick="signOut()" data-mini="true" data-icon="long-arrow-left">Sign Out</a>
                     
 				</div>
 			
@@ -432,7 +591,7 @@ S<!DOCTYPE html>
 				
 				<!--added by hector-->
                 <a data-role="button" onClick = "Search()">Search</a>
-                <ul id="movies-list" data-role="listview" data-inset="true">
+                <ul id="movies-list" data-role="listview" data-inset="true" data-icon="false">
                 </ul>
 				
 			<div data-role="footer" data-theme="b" data-position="fixed">				
@@ -442,7 +601,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -474,7 +633,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -501,7 +660,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -529,7 +688,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -547,7 +706,7 @@ S<!DOCTYPE html>
 				
 				<div data-role="content">
 					<input type="search" name="search" id="search-basic" value="" />
-					<ul data-role="listview">
+					<ul data-role="listview" >
 						<li><a href="#books">Children</a></li>
 						<li><a href="#electronics">Fiction</a></li>
 						<li><a href="#computers">Technology</a></li>
@@ -562,7 +721,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -596,7 +755,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -629,7 +788,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -662,7 +821,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -694,7 +853,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -729,7 +888,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -761,7 +920,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -793,7 +952,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -805,27 +964,22 @@ S<!DOCTYPE html>
 		<div id="MyZaar" data-role="page">
 			
 				<div data-role="header" data-theme="b" data-position="fixed">
-					<a href="#profile_page" data-role="button" data-icon="user">Profile</a>
+					<a href="#profile_page" data-role="button" onclick="myf()" data-icon="user">Profile</a>
 					<h1>MyZaar</h1>
 				</div>
 				
 				<div data-role="content">
 					
+
 					<div class="ui-grid-b">
-						<div class="ui-block-a"><a data-role="button" data-mini="true" href="#watching">Watching</a></div>
-						<div class="ui-block-b"><a data-role="button" data-mini="true" href="#home_page">Buying</a></div>
-						<div class="ui-block-c"><a data-role="button" data-mini="true" href="#home_page">Selling</a>
-							
-							
-		 	
-						</div>
+						<div class="ui-block-a"><a data-role="button" onclick="myWatching()" data-mini="true">Watching</a></div>
+						<div class="ui-block-b"><a data-role="button" data-mini="true" onclick="myBuying()">Buying</a></div>
+						<div class="ui-block-c"><a data-role="button" data-mini="true" onclick="mySelling()">Selling</a></div>
 					</div>
 					
-					<div data-role="content">	
-			            	<ul id="selling-list" data-role="listview" data-inset="true">
-		            		</ul>
-		                	</div>
-		 	
+					<ul id="selling-list" data-role="listview" data-inset="true" data-icon="false">
+		            </ul>
+				
 					
 				</div>
 				
@@ -836,7 +990,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -874,34 +1028,29 @@ S<!DOCTYPE html>
 					<a data-role="button" data-icon="user" onclick="UpdateProduct()">Update</a>
 					<h1>Product Page</h1>
 				</div>
-				<center>
-				<img src=http://stanleyavenue.ultranet.school.nz/DataStore/Pages/CLASS_224/Docs/Documents/books3.jpg  width="50%" alt=""/>
-				</center>
 				<div data-role="content">
 					
-					<form id="productForm">
- 				<fieldset data-role="controlgroup">
- 					
-  					<label for="pName"> Product Name: <input id="pName" name="pName" type="text"/></label>
-  					<label for="iPrice"> Price: <input id="iPrice" name="iPrice" type="text"/></label>
-  					<label for="bPrice"> Bidding Price: <input id="bPrice" name="bPrice" type="text"/></label>
-  					<label for="Description"> Description: <input id="Description" name="Description" type="text"/></label>
-  					<label for="model"> Model: <input id="model" name="model" type="text"/></label>
-  					<label for="brand"> Dimensions: <input id="brand" name="brand" type="text"/></label>
-  				
-  			  
-			 </fieldset>
-			</form>			
-			
-			    <a data-role="button" onclick="viewBidHistory()">View Bid History</a>
+				<ul data-role="listview" data-inset="true">
+						<li><center id="theImage">
+						
+						</center></li>
+						<li id="pname" > Product Name: </li>
+						<li id="pinstant_price">Price: </li>
+						<li id="pdesc"> Description: </li>
+						<li id="pmodel" > Model: </li>
+						<li id="pbrand" > Brand: </li>
+				</ul>
+
+			    <a data-role="button" href="bid_history" onclick="viewBidHistory()">View Bid History</a>
+			    <a data-role="button" href="#seller_profile_page" onclick="viewSellerProfile()"> View Seller Profile </a>
 			    <a data-role="button" onclick="addToCart()">Add To Cart</a>
-                <a data-role="button" href="#BIN_invoice">Buy it now</a>
+                <a data-role="button" href="#order_page">Buy It Now</a>
                 
                 <div class="ui-grid-b">
                 <div  class="ui-block-a"><center><p>Current Bid $64:</p></center></div>
                 <div class="ui-block-b"><input id="bidAmount" name="pName" type="text"/></div>
                 <div class="ui-block-c"><a data-role="button" onclick="bid()">Bid</a></div>
-            </div><!-- /grid-b -->
+            	</div><!-- /grid-b -->
                 
 				</div>
 				
@@ -912,7 +1061,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -931,24 +1080,40 @@ S<!DOCTYPE html>
 				
 				
 				<div data-role="content">
-					
+					<ul data-role="listview" data-inset="true">
+						<li ><center><img src=http://something-gold-something-new.com/wp-content/uploads/2013/02/foals-holy-fire-580x352.jpg height="100" width="100"><center></li>
+						<li id="userid"></li>
+						<li id="myfirstname"></li>
+						<li id="mylastname"></li>
+						<li id="myEmail"></li>
+					</ul>
 
-			<center><img src=http://something-gold-something-new.com/wp-content/uploads/2013/02/foals-holy-fire-580x352.jpg height="42" width="42"></center>
-				
-			<center><div>
-				<p id="name_user_profile"></p>                
-        		<p id="adress_user_profile"></p>    
-        		<p id="state_BIN"> Puerto Rico </p> 
-        		<p id="phone_BIN"> (787)-318-9597 </p>  
-        		<p> Rating: 5 </p>  
-			</div></center>
-					
-					<h1><center>Also Selling:</center></h1>
+					<div data-role="collapsible" data-content-theme="c" data-theme="a">
+						<h3> Payment Options</h3>
+						<ul data-role="listview" id="paymentOptions">
+							
+						</ul>
+					</div>
+
+					<div data-role="collapsible" data-content-theme="c" data-theme="a">
+						<h3> Shipping Adresses </h3>
+						<ul data-role="listview" id="shippingAdresses">
+						</ul>
 						
-					<div data-role="content">	
-			            	<ul id="also_selling-list" data-role="listview" data-inset="true">
-		            		</ul>
-		                	</div>
+					</div>
+
+					<div data-role="collapsible" data-content-theme="c" data-theme="a">
+						<h3> Billing Adresses </h3>
+						<ul data-role="listview" id="billingAdresses">
+							
+						</ul>
+					</div>
+
+					<center><div>
+                		<p id="adress_user_profile"></p>   
+                	
+            		</div></center>
+						
 				</div>
 				
 			<div data-role="footer" data-theme="b" data-position="fixed">				
@@ -958,13 +1123,151 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
+					</ul>
+				</div>
+			</div>	
+							
+		</div>	
+
+
+		<div id="order_page" data-role="page"> 
+			
+				<div data-role="header" data-theme="b" data-position="fixed">
+					<h1>Order</h1>
+					
+				</div>
+				
+				
+				<div data-role="content">
+					<ul data-role="listview" data-inset="true">
+						<li ><center><img src=http://something-gold-something-new.com/wp-content/uploads/2013/02/foals-holy-fire-580x352.jpg height="100" width="100"><center></li>
+						<li id="orderid"></li>
+						<li id="productname"></li>
+						<li id="pinstantprice"></li>
+						<li id="productbrand"></li>
+					</ul>
+
+					<div data-role="collapsible" data-content-theme="c" data-theme="a">
+						<h3> Payment Options</h3>
+							
+
+						<form id="payment_option_form">
+                   			<fieldset id="temp" data-role="controlgroup">
+                         
+                    		</fieldset>
+           	 			</form>
+
+
+					</div>
+
+					<div data-role="collapsible" data-content-theme="c" data-theme="a">
+						<h3> Shipping Adresses </h3>
+						<ul data-role="listview" id="shippingAdresses">
+						</ul>
+						
+					</div>
+
+					<a data-role="button" href="#invoice_page">Continue</a>
+
+					<center><div>
+                		<p id="adress_user_profile"></p>   
+                	
+            		</div></center>
+						
+				</div>
+				
+			<div data-role="footer" data-theme="b" data-position="fixed">				
+				<div data-role="navbar">
+					<ul>	
+						<li><a href="#home_page" data-icon="home"> Home </a></li>	
+						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
+						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
+						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
 							
 		</div>	
 		
+
+		<!-- seller profile page -->							
+		
+		<div id="seller_profile_page" data-role="page"> 
+			
+				<div data-role="header" data-theme="b" data-position="fixed">
+					<h1>Seller Details</h1>
+					<a href="#my_profile_editor" data-role="button" data-icon="wrench" onclick="GetUser()">Edit</a>
+				</div>
+				
+				
+				<div data-role="content">
+					<ul data-role="listview" data-inset="true">
+						<li ><center><img src=http://something-gold-something-new.com/wp-content/uploads/2013/02/foals-holy-fire-580x352.jpg height="100" width="100"><center></li>
+						<li id="selleruserid"></li>
+						<li id="sellerfirstname"></li>
+						<li id="sellerlastname"></li>
+						<li id="selleremail"></li>
+					</ul>
+						
+					<center><h2>Also Selling</h2></center>	
+					<ul id="seller-products" data-role="listview" data-inset="true">
+					</ul>
+
+				</div>
+				
+			<div data-role="footer" data-theme="b" data-position="fixed">				
+				<div data-role="navbar">
+					<ul>	
+						<li><a href="#home_page" data-icon="home"> Home </a></li>	
+						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
+						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
+						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
+					</ul>
+				</div>
+			</div>	
+							
+		</div>
+
+		<div id="invoice_page" data-role="page"> 
+			
+				<div data-role="header" data-theme="b" data-position="fixed">
+					<h1>Invoice</h1>
+					
+				</div>
+				
+				
+				<div data-role="content">
+					<ul data-role="listview" data-inset="true">
+						<li id="invoiceid"></li>
+						<li id="productname_invoice"></li>
+						<li id="pinstantprice_invoice"></li>
+						<li id="invoice_date"></li>
+						<li id="due_date"></li>
+						<li id="payment_invoice"></li>
+						<li id="billingAdress_invoice"></li> 
+						<li id="shippingAdress_invoice"></li> 
+						
+					</ul>
+					<a data-role="button" href="#therating_page">Purchase</a>
+				</div>
+				
+			<div data-role="footer" data-theme="b" data-position="fixed">				
+				<div data-role="navbar">
+					<ul>	
+						<li><a href="#home_page" data-icon="home"> Home </a></li>	
+						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
+						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
+						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
+					</ul>
+				</div>
+			</div>	
+							
+		</div>	
+
 		<!-- page 13 Edit your profile page -->	
 		
 		<div data-role="page" id ="my_profile_editor">
@@ -1000,7 +1303,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -1070,7 +1373,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -1110,7 +1413,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	
@@ -1119,62 +1422,6 @@ S<!DOCTYPE html>
            
  <!---16   buy it now invoice Page -->
 
-
-<div id="BIN_invoice" data-role="page">
-            
-                <div data-role="header" data-theme="b" data-position="fixed">
-                    <a href="#profile_page" data-role="button" data-icon="user">Profile</a>
-                    <h1>Buy it now Invoice</h1>
-                </div>
-                
-        <div data-role="content">
-                    
-        <p id="name_BIN"></p>                
-        <p id="adress_BIN"></p>    
-        <p id="state_BIN"> Puerto Rico </p> 
-        <p id="phone_BIN"> (787)-318-9597 </p>    
-
-        <center><table data-role="table" id="movie-table" data-mode="reflow" class="ui-responsive table-stroke">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Qty</th>
-          <th>Price</th>
-          <th>Total Ex. Tax</th>
-        </tr>
-      </thead>
-      <tbody id="tbody_BIN">
-        <tr>
-          <th> A Book </th>
-          <td> 1 </td>
-          <td>1941</td>
-          <td>3.99</td>
-        </tr>
-        <tbody>
-    </table>
-</center>
-
-<a  data-role="button" href="#purchase_page"> Purchase </a>
-
-
-                    
-                    
-                    
-                </div>
-                
-            <div data-role="footer" data-theme="b" data-position="fixed">                
-                <div data-role="navbar">
-                    <ul>    
-                        <li><a href="#home_page" data-icon="home"> Home </a></li>    
-                        <li><a href="#browse_index" data-icon="search"> Browse </a></li>    
-                        <li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>    
-                        <li><a href="#sell_page" data-icon="dollar"> Sell </a></li>    
-                        <li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>    
-                    </ul>
-                </div>
-            </div>    
-            
-        </div>       
         
         
         <div id="checkOut_page" data-role="page">
@@ -1205,7 +1452,7 @@ S<!DOCTYPE html>
     </table>
 </center>
 
-<a  data-role="button" href="#purchase_page"> Purchase </a>
+<a  data-role="button" href="#therating_page"> Purchase </a>
 
 
    <!--- 17 cart invoice Page -->                 
@@ -1220,7 +1467,7 @@ S<!DOCTYPE html>
                         <li><a href="#browse_index" data-icon="search"> Browse </a></li>    
                         <li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>    
                         <li><a href="#sell_page" data-icon="dollar"> Sell </a></li>    
-                        <li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>    
+                        <li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>    
                     </ul>
                 </div>
             </div>    
@@ -1230,10 +1477,10 @@ S<!DOCTYPE html>
         
  <!--- 17 cart invoice Page -->     
          
-        <div id="purchase_page" data-role="page">
+        <div id="therating_page" data-role="page">
             <div data-role="header" data-theme="b" data-position="fixed">
                 <a href="#mypanel" data-role="button" data-icon="flag">Home</a>
-                <a href="#cart_page" data-role="button" data-iconpos="notext" data-icon="shopping-cart"></a>
+                <a onclick="getCart()" data-role="button" data-iconpos="notext" data-icon="shopping-cart"></a>
                 <h1>Bazaar</h1>
             </div>
             
@@ -1276,7 +1523,7 @@ S<!DOCTYPE html>
                         <li><a href="#browse_index" data-icon="search"> Browse </a></li>    
                         <li><a href="#MyZaar" data-icon="user"> MyZaar </a></li>    
                         <li><a href="#selling_form" data-icon="dollar"> Sell </a></li>    
-                        <li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>    
+                        <li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>    
                     </ul>
                 </div>
             </div>        
@@ -1307,7 +1554,7 @@ S<!DOCTYPE html>
 						<li><a href="#browse_index" data-icon="search"> Browse </a></li>	
 						<li><a href="#MyBay" data-icon="user"> MyBay </a></li>	
 						<li><a href="#selling_form" data-icon="dollar"> Sell </a></li>	
-						<li><a href="#cart_page" data-icon="shopping-cart"> Cart </a></li>	
+						<li><a onclick="getCart()" data-icon="shopping-cart"> Cart </a></li>	
 					</ul>
 				</div>
 			</div>	

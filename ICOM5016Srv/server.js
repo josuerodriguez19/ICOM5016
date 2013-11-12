@@ -1,5 +1,7 @@
 // Express is the web framework 
 var express = require('express');
+var pg = require('pg');
+
 var app = express();
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -34,6 +36,9 @@ var Book = book.Book;
 
 var product = require("./product.js");
 var Product = product.Product;
+
+var conString = "pg://postgres:database@localhost:5432/mydb";
+
 
 var productList = new Array(
 	new Product("MyBook", "10.00", "1.47", "In good condition", "mymodel", "http://stanleyavenue.ultranet.school.nz/DataStore/Pages/CLASS_224/Docs/Documents/books3.jpg", "mybrand", "mydimension", "Books", "Fiction", 0),
@@ -142,10 +147,88 @@ for(var i = 0; i < bidsList.length; ++i){
 // c) PUT - Update an individual object, or collection  (Database update operation)
 // d) DELETE - Remove an individual object, or collection (Database delete operation)
 
+app.get('/ClassDemo4Srv/cars', function(req, res) {
+	console.log("GET LOL");
+	//var tom = {"make" : "Ford", "model" : "Escape", "year" : "2013", "description" : "V4 engine, 30mpg, Gray", "price" : "$18,000"};
+	//var tom = new Car("Ford", "Escape", "2013", "V4 engine, 30mpg, Gray", "$18,000");
+	//console.log("tom: " + JSON.stringify(tom));
+	
+	var client = new pg.Client(conString);
+	client.connect();
+
+	var query = client.query("SELECT * from cars");
+	
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		var response = {"cars" : result.rows};
+		console.log(result.rows);
+		client.end();
+  		res.json(response);
+ 	});
+});
+
+
 app.get('/ICOM5016Srv/categories', function(req, res) {
 	console.log("CAT");
 	var response = {"categories" : categoryList};
   	res.json(response);
+});
+
+
+//added By Ramon, october 30, 2013
+//MAIN CATEGORIES GET
+//This query gets all the categories that don't have any parents; meaning the main categories.
+
+app.get('/ICOM5016Srv/categoriesTest', function(req, res) {
+	var client = new pg.Client(conString);
+	client.connect();
+	var query = client.query("SELECT * from categories where cparent is NULL");
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		var response = {"categories" : result.rows};
+		client.end();
+  		res.json(response);
+ 	});
+});
+
+//Added by Ramon, october 30, 2013
+//SUBCATEGORY & PRODUCTS GET
+//Method for browsing through subcategories. 
+//The first query gets all the children of this category. If 0 subcategories are returned
+//A second query looking for the corresponding products is executed. The second query selects 
+//all the products where the cid from the category selected matches the cid of the product.
+
+app.get('/ICOM5016Srv/categories2/:categoryID', function(req, res) {
+	console.log("this is a test");
+	var id = req.params.categoryID;
+	var client = new pg.Client(conString);
+	client.connect();
+	var query = client.query("SELECT * from categories where cparent = $1", [id]);
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		if(result.rowCount == 0){
+			var query1 = client.query("SELECT * from products where cid = $1", [id]);
+			query1.on("row", function (row, result) {
+    		result.addRow(row);
+			});
+			query1.on("end", function (result) {
+				var theCategories = "empty";
+				var response = {"products" : result.rows, "categories" : theCategories};
+				client.end();
+  				res.json(response);
+			});
+		}else{
+				var response = {"categories" : result.rows};
+				client.end();
+  				res.json(response);
+  		}
+ 	});
 });
 
 app.get('/ICOM5016Srv/bidHistory', function(req, res) {
@@ -153,31 +236,26 @@ app.get('/ICOM5016Srv/bidHistory', function(req, res) {
   	res.json(response);
 });
 
+
+//added by Ramon, october 30, 2013
+//PRODUCT INFO GET
+//Queries the databse for a product that matches the selected product id.
 app.get('/ICOM5016Srv/product/:id', function(req, res) {
 	var id = req.params.id;
-		
-	if ((id < 0) || (id >= productNextId)){
-		// not found
-		res.statusCode = 404;
-		res.send("not found.");
-	}
-	else {
-		var target = -1;
-		for (var i=0; i < productList.length; ++i){
-			if (productList[i].id == id){
-				target = i;
-				break;	
-			}
-		}
-		if (target == -1){
-			res.statusCode = 404;
-			res.send("Car not found.");
-		}
-		else {
-			var response = {"product" : productList[target]};
-  			res.json(response);	
-  		}	
-	}
+	var client = new pg.Client(conString);
+	client.connect();
+	var query = client.query("SELECT * from products where pid = $1", [id]);
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		//results.rows returns an array of products, since result.rows in this case
+		//has only one element, this element is what is going to be sent to the client
+		var product = result.rows[0];
+		var response = {"product" : product};
+		client.end();
+  		res.json(response);
+ 	});
 });
 
 app.get('/ICOM5016Srv/categories/:categoryID', function(req, res) {
@@ -242,6 +320,9 @@ app.get('/ICOM5016Srv/something', function(req, res) {
 	var response = { "users" : userList};
 	res.json(response);
 });
+
+
+
 
 
 
@@ -313,38 +394,36 @@ app.post('/ICOM5016Srv/user3', function(req, res) {
 });
 
 // REST Operation - HTTP GET to read a user based on its id - JR
+
+//added by Josue, november 3, 2013
+//USER  GET
+//Queries the databse for a user that matches the selected user id.
+//FALTA POR TERMINAR PARA HACER NATURAL JOINT CON DATA CONCRETA
 app.get('/ICOM5016Srv/users/:id', function(req, res) {
-var id = req.params.id;
-console.log("GET user: " + id);
-
-if ((id < 0) || (id >= userNextId)){
-// not found
-res.statusCode = 404;
-res.send("User not found.");
-}
-else {
-var target = -1;
-for (var i=0; i < userList.length; ++i){
-if (userList[i].id == id){
-target = i;
-break;	
-
-}
-}
-if (target == -1){
-res.statusCode = 404;
-res.send("User not found.");
-
-}
-else {
-var response = {"user" : userList[target]};
- 
-  res.json(response);	
- 
-
-  }	
-}
+    var id = req.params.id;
+    var client = new pg.Client(conString);
+    client.connect();
+    console.log("1p");
+    var query = client.query("select * from account where accountid = $1", [id]);
+    query.on("row", function (row, result) {
+        console.log("2p");
+        result.addRow(row);
+        console.log(result.rows);
+    });
+    query.on("end", function (result) {
+        //results.rows returns an array of products, since result.rows in this case
+        //has only one element, this element is what is going to be sent to the client
+        console.log("hello 1");
+        var account = result.rows[0];
+        console.log("hello 2");
+        var response = {"account" : account};
+        console.log("hello 3");
+        client.end();
+            console.log("3p");
+          res.json(response);
+     });
 });
+
 
 // REST Operation - HTTP PUT to updated a user based on its id - JR (ayuda de Ramon)
 app.put('/ICOM5016Srv/temp/:id', function(req, res) {
@@ -454,17 +533,51 @@ app.post('/ICOM5016Srv/products', function(req, res) {
 });
 
 // REST Operation - HTTP GET to read all selling products - JR 4/10/13
-app.get('/Icom5016Srv/sellingproducts', function(req, res) {
-	console.log("GET");
-	var response = {"products" : productList};
-  	res.json(response);
+app.get('/Icom5016Srv/sellingproducts/:userid', function(req, res) {
+	var watching;
+	var buying;
+	var selling;
+	var userid = req.params.userid;
+
+	var client = new pg.Client(conString);
+	client.connect();
+
+	//WATCHING QUERY
+	var query1 = client.query("select distinct pid, pname, pinstant_price, pmodel, pbrand, pdescription, pimage_filename, pdimensions, pcategory, cid, userid from auction natural join products natural join bid where buyerid = '" + userid + "' order by pname");
+	query1.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query1.on("end", function (result) {
+		watching = result.rows;
+		console.log("watching query");
+		console.log(watching);
+ 	});
+
+ 	//BUYING QUERY
+	var query2 = client.query("select distinct pid, pname, pinstant_price, pmodel, pbrand, pdescription, pimage_filename, pdimensions, pcategory, cid, userid from productsold natural join products where buyerid = '" + userid + "' order by pname");
+	query2.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query2.on("end", function (result) {
+		buying = result.rows;
+		console.log("buying query");
+		console.log(buying);
+ 	});
+
+	//SELLING QUERY
+ 	var query3 = client.query("select * from products where userid = '" + userid + "' order by pname");
+	query3.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query3.on("end", function (result) {
+		selling = result.rows;
+		console.log("selling query");
+ 		var response = {"watching" : watching, "selling" : selling, "buying": buying };
+ 		client.end();
+		res.json(response);	
+ 	});
+	
 });
-
-
-
-// Server starts running when listen is called.
-app.listen(process.env.PORT || 3412);
-console.log("server listening");
 
 
 app.post('/ICOM5016Srv/rating', function(req, res) {
@@ -486,11 +599,27 @@ app.post('/ICOM5016Srv/rating', function(req, res) {
 
 
 //Added by Hector
-app.get('/ICOM5016Srv/movies', function(req, res) {
-	console.log("GET Movies List");
-	console.log("Movies list length " + productList.length);
-	var response = {"products" : productList};
-  	res.json(response);
+//Modified by Ramon, october 30, 2013
+//SEARCH BAR GET
+//Queries the database for products who's pname match or 
+//are "like" the string written in the search bar.
+
+app.get('/ICOM5016Srv/search/:searchWord', function(req, res) {
+
+var searchWord = req.params.searchWord;
+console.log("search");
+	var client = new pg.Client(conString);
+	client.connect();
+	var query = client.query("SELECT * from products where pname ilike '%"+searchWord+"%'");
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		var response = {"products" : result.rows};
+		console.log(result.rows);
+		client.end();
+  		res.json(response);
+ 	});
 });
 //Added by Hector
 app.get('/ICOM5016Srv/movie/:id', function(req, res) {
@@ -542,13 +671,6 @@ app.put('/ICOM5016Srv/modifyUser/:id', function(req, res) {
 			console.log("Server: ModifyUser");
   			res.json(true);		
   	
-});
-
-//added by Hector
-app.get('/ICOM5016Srv/reports', function(req, res) {
-			
-			console.log("Server: Get Reports");
-  			res.json(true);	
 });
 
 
@@ -616,3 +738,508 @@ app.del('/ICOM5016/deleteUser/:id', function(req, res) {
   		}		
 	}
 });
+
+
+//added by Ramon, november 3, 2013
+//USER AUTHENTICATION GET
+app.post('/ICOM5016Srv/authenticate', function(req, res) {
+	console.log("start authentication");
+  	if(!req.body.hasOwnProperty('user_name') || !req.body.hasOwnProperty('password2')) {
+    	res.statusCode = 400;
+    	return res.send('Error: Missing fields for user.');
+  	}
+	var username = req.body.user_name;
+	var password = req.body.password2;
+	var match = false;
+  	var client = new pg.Client(conString);
+	client.connect();
+	var query = client.query("SELECT * from account natural join users where username = $1 and password = $2", [username, password]);
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+			if(result.rowCount > 0){
+				var response = {"user" : result.rows[0]};
+				match = true;
+			}
+		client.end();
+		if(match){
+		console.log("end authentication");
+		res.json(response);
+	}
+		else{	
+			res.statusCode = 400;
+    		return res.send('No match found');
+		}
+ 	});
+});
+
+//added by Ramon modified by hector cause he is better 
+//this query gets the shopping cart items of the current user
+app.get('/ICOM5016Srv/getCart/:userid', function(req, res) {
+	console.log("getCart()");
+	var client = new pg.Client(conString);
+	client.connect();
+	var userid = req.params.userid;
+	//this query needs to be changed accordingly
+	var query = client.query("select * from shopping_cart natural join products where buyerid = '" + userid + "'");
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		var response = {"products" : result.rows};
+		console.log("end getCart()");
+		client.end();
+  		res.json(response);
+ 	});
+});
+
+app.get('/ICOM5016Srv/UserInfo/:id', function(req, res) {
+	var cc;
+	var shipping;
+	var billing;
+	console.log("user info start");
+	var id = req.params.id;
+	var client = new pg.Client(conString);
+	client.connect();
+
+	//CREDIT CARD QUERY
+	var query1 = client.query("SELECT * from creditcard natural join users natural join account  where userid = $1", [id]);
+	query1.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query1.on("end", function (result) {
+		cc = result.rows;
+		console.log(cc);
+ 	});
+
+	//SHIPPING ADRESS QUERY
+	var query2 = client.query("SELECT * from shipping_adress natural join users natural join account  where userid = $1", [id]);
+	query2.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query2.on("end", function (result) {
+		shipping = result.rows;
+		console.log(shipping);
+ 	});
+
+ 	//BILLING ADRESS QUERY
+ 	var query3 = client.query("SELECT * from billing_adress natural join users natural join account  where userid = $1", [id]);
+	query3.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query3.on("end", function (result) {
+		billing = result.rows;
+		var response = {"creditcard" : cc, "shipping": shipping, "billing" : billing};
+		console.log(response);
+		console.log("user info end");
+		client.end();
+  		res.json(response);
+ 	});
+
+
+});
+
+//added by ramon
+app.get('/ICOM5016Srv/SellerInfo/:id', function(req, res) {
+	console.log("Seller Info Start");
+	var id = req.params.id;
+	console.log("ID" + id);
+	var seller;
+	var otherProducts;
+	var sellerid;
+	var client = new pg.Client(conString);
+	client.connect();
+	//this query needs to be changed accordingly
+	var query = client.query("SELECT * from products natural join account natural join users where pid = $1", [id]);
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		seller = result.rows;
+		console.log(result.rows);
+		sellerid = result.rows[0].userid;
+
+		var query2 = client.query("SELECT * from products where userid = '" + sellerid + "'");
+		query2.on("row", function (row, result) {
+    		result.addRow(row);
+		});
+		query2.on("end", function (result) {
+		otherProducts = result.rows;
+		console.log(result.rows);
+		var response = {"seller" : seller, "otherProducts": otherProducts};
+		console.log("Seller Info End");
+		console.log(response);
+		client.end();
+  		res.json(response);
+ 	});
+ 	});
+});
+
+app.get('/ICOM5016Srv/BidHistory/:id', function(req, res) {
+	console.log("bid history product start");
+	var id = req.params.id;
+	var client = new pg.Client(conString);
+	client.connect();
+	//this query needs to be changed accordingly
+	var query = client.query("SELECT * from auction natural join bid  where pid = $1", [id]);
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		console.log(" PRODUCT ID NIGGA " + id);
+		var response = {"bidHistory" : result.rows};
+		console.log(response);
+		console.log("end bid history product");
+		client.end();
+  		res.json(response);
+ 	});
+});
+
+
+
+
+
+
+//added by Hector////////////////////////////////////////////////////////////////////////////////////////////////
+//This function is to get the total sales by month, week or day//////////////////////////////////////////////////
+app.get('/ICOM5016Srv/totalsales/:year/:month/:day/:radio', function(req, res) {
+			
+	var year = req.params.year;
+	var month = req.params.month;
+	var day = req.params.day; 
+	var radio = req.params.radio;
+	console.log("day: " + day);
+	console.log("Month: " + month);
+	console.log("year: " + year);
+
+			console.log("Server: Get total sales");
+  	var client = new pg.Client(conString);
+	client.connect();
+	if(radio == "day"){
+			console.log("radio button day");
+		
+			var daysold = year + "-" + month + "-" + day;
+			var query = client.query("Select Count(*) as count From productsold Where daysold = '" + daysold + "'");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+			});
+			query.on("end", function (result) {
+			console.log("count: " + result.rows[0].count);
+			var response = {"totalsales" : result.rows};
+			client.end();
+  			res.json(response);
+ 	});	
+			
+		
+		
+	
+	}
+	else if(radio == "week"){
+		console.log("radio button week");
+		
+			var daysold = year + "-" + month + "-" + day;
+			var query = client.query("SELECT count(*) AS count FROM productsold WHERE EXTRACT(Week from daysold) = (SELECT EXTRACT(week FROM DATE '" + daysold + "'))");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+			});
+			query.on("end", function (result) {
+			console.log("count: " + result.rows[0].count);
+			var response = {"totalsales" : result.rows};
+			client.end();
+  			res.json(response);
+			});
+	}
+	else{
+		console.log("radio button month");
+		
+			
+			var query = client.query("SELECT Count(*) AS count FROM productsold WHERE EXTRACT(Year from daysold) = '" + year + "' AND EXTRACT(Month from daysold) = '" + month + "'");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+			});
+			query.on("end", function (result) {
+			console.log("count: " + result.rows[0].count);
+			var response = {"totalsales" : result.rows};
+			client.end();
+  			res.json(response);
+			});
+	}
+	
+});
+
+
+//added by Hector////////////////////////////////////////////////////////////////////////////////////////////////
+//This function is to get the total sales by Product month, week or day//////////////////////////////////////////////////
+app.get('/ICOM5016Srv/totalsalesProduct/:year/:month/:day/:radio', function(req, res) {
+			
+	var year = req.params.year;
+	var month = req.params.month;
+	var day = req.params.day; 
+	var radio = req.params.radio;
+	console.log("day: " + day);
+	console.log("Month: " + month);
+	console.log("year: " + year);
+
+			console.log("Server: Get total sales By Product");
+  	var client = new pg.Client(conString);
+	client.connect();
+	if(radio == "day"){
+			console.log("radio button day");
+		
+			var daysold = year + "-" + month + "-" + day;
+			var query = client.query("SELECT pname AS product, count(*) AS total FROM products NATURAL JOIN productsold WHERE daysold = '" + daysold + "' GROUP BY product ORDER BY product");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+
+			});
+
+			query.on("end", function (result) {
+			var response = {"totalsalesProduct" : result.rows};
+			client.end();
+  			res.json(response);
+ 	});	
+			
+		
+		
+	
+	}
+	else if(radio == "week"){
+		console.log("radio button week");
+		
+			var daysold = year + "-" + month + "-" + day;
+			var query = client.query("SELECT pname AS product, count(*) AS total FROM products NATURAL JOIN productsold WHERE EXTRACT(Week from daysold) = (SELECT EXTRACT(week FROM DATE '" + daysold + "')) GROUP BY product ORDER BY product");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+			});
+			query.on("end", function (result) {
+			
+			var response = {"totalsalesProduct" : result.rows};
+			client.end();
+  			res.json(response);
+			});
+	}
+	else{
+		console.log("radio button month");
+		
+			
+			var query = client.query("SELECT pname AS product, count(*) AS total FROM products NATURAL JOIN productsold WHERE EXTRACT(Year from daysold) = '" + year + "' AND EXTRACT(Month from daysold) = '" + month + "' GROUP BY product ORDER BY product");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+			});
+			query.on("end", function (result) {
+			var response = {"totalsalesProduct" : result.rows};
+			client.end();
+  			res.json(response);
+			});
+	}
+	
+});
+
+
+//added by Hector//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//This function is to get the total Revenue by Product month, week or day//////////////////////////////////////////////////
+app.get('/ICOM5016Srv/totalrevenueProduct/:year/:month/:day/:radio', function(req, res) {
+			
+	var year = req.params.year;
+	var month = req.params.month;
+	var day = req.params.day; 
+	var radio = req.params.radio;
+	console.log("day: " + day);
+	console.log("Month: " + month);
+	console.log("year: " + year);
+
+			console.log("Server: Get total Revenue by Product");
+  	var client = new pg.Client(conString);
+	client.connect();
+	if(radio == "day"){
+			console.log("radio button day");
+		
+			var daysold = year + "-" + month + "-" + day;
+			var query = client.query("SELECT pname AS product, sum(price) AS revenue FROM products NATURAL JOIN productsold WHERE daysold = '" + daysold  + "' GROUP BY product ORDER BY product");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+			});
+			query.on("end", function (result) {
+			var response = {"totalrevenueProduct" : result.rows};
+			client.end();
+  			res.json(response);
+ 	});	
+			
+		
+		
+	
+	}
+	else if(radio == "week"){
+		console.log("radio button week");
+		
+			var daysold = year + "-" + month + "-" + day;
+			var query = client.query("SELECT pname AS product, sum(price) AS revenue FROM products NATURAL JOIN productsold WHERE EXTRACT(Week from daysold) = (SELECT EXTRACT(week FROM DATE '" + daysold + "')) GROUP BY product ORDER BY product");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+			});
+			query.on("end", function (result) {
+			
+			var response = {"totalrevenueProduct" : result.rows};
+			client.end();
+  			res.json(response);
+			});
+	}
+	else{
+		console.log("radio button month");
+		
+			
+			var query = client.query("SELECT pname AS product, sum(price) AS revenue FROM products NATURAL JOIN productsold WHERE EXTRACT(Year from daysold) = '" + year + "' AND EXTRACT(Month from daysold) = '" + month + "' GROUP BY product ORDER BY product");
+			query.on("row", function (row, result) {
+    			result.addRow(row);
+			});
+			query.on("end", function (result) {
+			var response = {"totalrevenueProduct" : result.rows};
+			client.end();
+  			res.json(response);
+			});
+	}
+	
+});
+
+app.get('/ICOM5016Srv/Order/:id/:uid', function(req, res) {
+	var id = req.params.id;
+	var uid = req.params.uid;
+	var order;
+	var billing;
+	console.log("order get start");
+	var client = new pg.Client(conString);
+	client.connect();
+	var query1 = client.query("SELECT * from products natural join orders where pid = $1", [id]);
+	query1.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query1.on("end", function (result) {
+		order = result.rows[0];
+ 	});
+	var query2 = client.query("SELECT * from creditcard natural join account natural join users where userid = $1", [uid]);
+	query2.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query2.on("end", function (result) {
+		billing = result.rows;
+		var response = {"order" : order, "billing": billing};
+		client.end();
+		console.log(order);
+		console.log(billing)
+		console.log("order end");
+  		res.json(response);
+ 	});
+
+
+});
+
+//added by Ramon
+//ESTO SIRVE LKJSLJGDLKGDFJGL
+app.get('/ICOM5016Srv/Invoice/:id', function(req, res) {
+	console.log("invoice start");
+	var id = req.params.id;
+	var client = new pg.Client(conString);
+	var accountid;
+	var invoiceInfo;
+	client.connect();
+	var query = client.query("SELECT * from orders natural join invoice natural join products natural join creditcard natural join billing_adress where pid = $1", [id]);
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		invoiceInfo = result.rows[0];
+		accountid = result.rows[0].accountid;
+		var query1 = client.query("select * from shipping_adress where accountid = $1", [accountid]);
+		query1.on("row", function (row, result) {
+    		result.addRow(row);
+	});
+	query1.on("end", function (result) {
+		var response = {"invoice": invoiceInfo , "shipping": result.rows[0]};
+		client.end();
+		console.log(response);
+		console.log("order end");
+  		res.json(response);
+ 	});
+
+
+
+ 	});
+	
+
+
+});
+
+
+//added by hector
+//this gets the order products from the shopping cart that the user wants to buy
+app.get('/ICOM5016Srv/OrderCart/:userid', function(req, res) {
+	console.log("entered Order Cart");
+	var client = new pg.Client(conString);
+	client.connect();
+	var userid = req.params.userid;
+	var orderProducts;
+	var billing;
+	//this query needs to be changed accordingly
+	var query = client.query("select * from shopping_cart natural join products where buyerid = '" + userid + "'");
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		orderProducts = result.rows;
+ 	});
+	
+	var query2 = client.query("SELECT * from creditcard natural join account natural join users where userid = '" + userid + "'");
+	query2.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query2.on("end", function (result) {
+		billing = result.rows;
+		var response = {"OrderCart" : orderProducts, "billing": billing};
+		client.end();
+  		res.json(response);
+ 	});
+});
+
+
+//added by Hector
+//this is to get the invoice information for the order from shopping cart
+app.get('/ICOM5016Srv/InvoiceCart/:id', function(req, res) {
+	console.log("invoice start");
+	var id = req.params.id;
+	var client = new pg.Client(conString);
+	var accountid;
+	var invoiceInfo;
+	client.connect();
+	var query = client.query("select distinct * from (invoice natural join shopping_cart natural join products) as a, billing_adress as b, creditcard as c  where a.billid = b.billid and b.credid = c.credid and a.buyerid = '" + id + "'");
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		invoiceInfo = result.rows;
+		accountid = result.rows[0].accountid;
+		var query1 = client.query("select * from shipping_adress where accountid = $1", [accountid]);
+		query1.on("row", function (row, result) {
+    		result.addRow(row);
+	});
+	query1.on("end", function (result) {
+		var response = {"invoice": invoiceInfo , "shipping": result.rows[0]};
+		client.end();
+		console.log(response);
+		console.log("order end");
+  		res.json(response);
+ 	});
+
+
+
+ 	});
+	
+
+
+});
+
+
+
+// Server starts running when listen is called.
+app.listen(process.env.PORT || 3412);
+console.log("server listening");
