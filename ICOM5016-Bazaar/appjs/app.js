@@ -5,6 +5,7 @@ var currentSignedIn = "";
 var currentCategory = {};
 var currentProducts = {};
 var selectedProduct = {};
+var categories = {};
 var currentUser = {};
 var view = 1;
 var shoppingCartIDs = new Array();
@@ -16,17 +17,20 @@ var selling = {};
 var userBillingAdress = {};
 var userPaymentOptions = {};
 var userShippingAdress = {};
-
+var newUserID = {};
+var newAccountID = {};
+var currentOrder = {};
 //new variables
 var shoppingCart;
+var allCategories = {};
 
 
 
 //adds a product to the cart
-function addToCart(){
-    shoppingCartIDs.push(selectedProduct);
-    alert("The product was added to your shopping cart!");
-}
+//function addToCart(){
+  //  shoppingCartIDs.push(selectedProduct);
+    //alert("The product was added to your shopping cart!");
+//}
 
 
 function removeFromCart(id){
@@ -59,6 +63,8 @@ function removeFromCart(id){
             list.listview("refresh");    
 	$.mobile.navigate("#cart_page");
 }
+
+
 
 
 //shows the list of products in your cart
@@ -119,6 +125,8 @@ function Browse(categoryID){
 	});
 }
 
+
+
 //viewing bid history
 function viewBidHistory(){
 	$.mobile.loading("show");
@@ -144,6 +152,31 @@ function viewBidHistory(){
 		}
 	});
 }
+
+$(document).on('pagebeforeshow', "#selling_form", function( event, ui ) {
+	console.log("Jose");
+	$.ajax({
+		url : "http://localhost:3412/ICOM5016Srv/selling_form_get_categories",
+		contentType: "application/json",
+		success : function(data, textStatus, jqXHR){
+			allCategories = data.categories;
+			var len = allCategories.length;
+			var list = $("#selectCategory");
+			list.empty();
+			var category;
+			for (var i=0; i < len; ++i){
+				category = allCategories[i];
+				list.append("<option value='"+category.cid+"'>" + category.cname + "</option>");
+			}
+			list.listview("refresh");	
+		},
+		error: function(data, textStatus, jqXHR){
+			console.log("textStatus: " + textStatus);
+			alert("Data not found!");
+		}
+	});
+});
+
 
 //creates te browsing categories
 $(document).on('pagebeforeshow', "#browse_index", function( event, ui ) {
@@ -312,12 +345,10 @@ function ConverToJSON(formData){
 
 //creates an user
 function SaveUser(){
-
 	var temp1 = $("#firstname").val();
 	var temp2 = $("#lastname").val();
-	var temp3 = $("#email").val();
-	var temp4 = $("#mail").val();
-	if(temp1 == "" || temp2 == "" || temp3 == "" || temp4 == ""){
+	var temp3 = $("#phone").val();
+	if(temp1 == "" || temp2 == "" || temp3 == ""){
 		alert("invalid input");	
 	}
 	else{
@@ -335,6 +366,7 @@ function SaveUser(){
 		contentType: "application/json",
 		dataType:"json",
 		success : function(data, textStatus, jqXHR){
+			newUserID = data.id;
 			$.mobile.loading("hide");
 			$.mobile.navigate("#username_form");
 		},
@@ -348,6 +380,7 @@ function SaveUser(){
 }
 
 function SaveUserName(){
+	// url : "http://localhost:3412/ICOM5016Srv/product/" + id,
 	$.mobile.loading("show");
 	var form = $("#username-form");
 	var formData = form.serializeArray();
@@ -356,14 +389,15 @@ function SaveUserName(){
 	console.log("New Car: " + JSON.stringify(newUser));
 	var newUserJSON = JSON.stringify(newUser);
 	$.ajax({
-		url : "http://localhost:3412/ICOM5016Srv/user2",
+		url : "http://localhost:3412/ICOM5016Srv/user2/" + newUserID,
 		method: 'post',
 		data : newUserJSON,
 		contentType: "application/json",
 		dataType:"json",
 		success : function(data, textStatus, jqXHR){
+			newAccountID = data.id;
 			$.mobile.loading("hide");
-			$.mobile.navigate("#credit_page");
+			$.mobile.navigate("#confirmed_registration");
 		},
 		error: function(data, textStatus, jqXHR){
 			console.log("textStatus: " + textStatus);
@@ -409,7 +443,7 @@ function SaveProduct(){
 	console.log("New Product: " + JSON.stringify(newProduct));
 	var newProductJSON = JSON.stringify(newProduct);
 	$.ajax({
-		url : "http://localhost:3412/ICOM5016Srv/products",
+		url : "http://localhost:3412/ICOM5016Srv/products/" + currentUser.userid,
 		method: 'post',
 		data : newProductJSON,
 		contentType: "application/json",
@@ -421,7 +455,7 @@ function SaveProduct(){
 		error: function(data, textStatus, jqXHR){
 			console.log("textStatus: " + textStatus);
 			$.mobile.loading("hide");
-			alert("Data could not be added!");
+			alert("Data could not be added! lol");
 		}
 	});
 
@@ -539,39 +573,13 @@ $.mobile.navigate("#welcome_page");
 $(document).on('pagebeforeshow', "#my_profile_editor", function( event, ui ) {
 // currentCar has been set at this point
 $("#upd-email").val(currentUser.email);
-$("#upd-mail").val(currentUser.mail);
+$("#upd-username").val(currentUser.username);
 $("#upd-password").val(currentUser.password);
-$("#upd-accountNumber").val(currentUser.accountNumber);
-$("#upd-billingAddress").val(currentUser.billingAddress);
-$("#upd-CCinfo").val(currentUser.CCinfo);
+
 });
 
 
-function GetUser(){
-id = currentUser.id;
-$.mobile.loading("show");
-$.ajax({
-url : "http://localhost:3412/ICOM5016Srv/users/" + id,
-method: 'get',
-contentType: "application/json",
-dataType:"json",
-success : function(data, textStatus, jqXHR){
-currentUser = data.user;
-$.mobile.loading("hide");
-$.mobile.navigate("#my_profile_editor");
-},
-error: function(data, textStatus, jqXHR){
-console.log("textStatus: " + textStatus);
-$.mobile.loading("hide");
-if (data.status == 404){
-alert("User not found.");
-}
-else {
-alert("Internal Server Error.");
-}
-}
-});
-}
+
 
 function UpdateUser(){ 
 $.mobile.loading("show");
@@ -836,28 +844,50 @@ $(document).on('pagebeforeshow', "#BIN_invoice", function( event, ui ) {
 });
 
 function rateUser(){
-alert("Thank you for rating!");
+alert("Thank you for rating! :)");
 $.mobile.loading("show");
-    var form = $("#rate_form");
-    var formData = form.serializeArray();
-    var newCar = ConverToJSON(formData);
-    var newCarJSON = JSON.stringify(newCar);
-   
-    $.ajax({
-        url : "http://localhost:3412/ICOM5016Srv/rating",
-        method: 'post',
-        data : newCarJSON,
-        contentType: "application/json",
-        dataType:"json",
-        success : function(data, textStatus, jqXHR){
-            $.mobile.loading("hide");
-        },
-        error: function(data, textStatus, jqXHR){
-            console.log("textStatus: " + textStatus);
-            $.mobile.loading("hide");
-            alert("Data could not be added!");
-        }
-    });
+  
+    	var rating = $('input:radio[name=radioInv]:checked').val();
+	var pid = selectedProduct.pid;
+	var sellerid = selectedProduct.userid;
+	var buyerid = currentUser.userid;
+	var price = selectedProduct.pinstant_price;
+
+
+
+$.ajax({
+		url : "http://localhost:3412/ICOM5016Srv/rating/" + rating + "/" + pid + "/" + sellerid + "/" + buyerid + "/" + price,
+		method: 'get',
+		contentType: "application/json",
+		dataType:"json",
+		success : function(data, textStatus, jqXHR){
+			$.mobile.loading("hide");
+			$.mobile.navigate("#home_page");
+		},
+		error: function(data, textStatus, jqXHR){
+			console.log("textStatus: " + textStatus);
+			$.mobile.loading("hide");
+			
+				alert("data not updated.");
+			
+		}
+	});
+
+
+   // $.ajax({
+      //  url : "http://localhost:3412/ICOM5016Srv/rating/" + rating + "/" + pid + "/" + sellerid + "/" + buyerid + "/" + price,
+       // contentType: "application/json",
+        //success : function(data, textStatus, jqXHR){
+          //  $.mobile.loading("hide");
+		//alert("success");
+	    //$.mobile.navigate("#home_page");
+        //},
+       // error: function(data, textStatus, jqXHR){
+         //   console.log("textStatus: " + textStatus);
+           // $.mobile.loading("hide");
+           // alert("Data could not be added!");
+        //}
+  //  });
 
 }
 
@@ -1251,29 +1281,28 @@ $(document).on('pagebeforeshow', "#order_page", function( event, ui ) {
 		url : "http://localhost:3412/ICOM5016Srv/Order/" + selectedProduct.pid + "/" + currentUser.userid,
 		contentType: "application/json",
 		success : function(data, textStatus, jqXHR){
+			currentOrder = data.order;
 			var theOrder = data.order;
 			var theBilling = data.billing;
 			$("#orderid").empty();
     		$("#orderid").append("Order ID: " +  theOrder.orderid); 
     		$("#productname").empty();
-    		$("#productname").append("Product Name: " +  theOrder.pname);
+    		$("#productname").append("Product Name: " +  selectedProduct.pname);
     		$("#pinstantprice").empty();
-    		$("#pinstantprice").append("Price: " +  theOrder.pinstant_price);
+    		$("#pinstantprice").append("Price: " +  selectedProduct.pinstant_price);
     		$("#productbrand").empty();
-    		$("#productbrand").append("Product Brand: " +  theOrder.pbrand);
+    		$("#productbrand").append("Product Brand: " +  selectedProduct.pbrand);
     		var len = theBilling.length;
     		var list = $("#temp");
 			list.empty();
 			var billing;
 			for (var i=0; i < len; ++i){
 			billing = theBilling[i];
-			list.append("<input type=\"radio\" name=\"radio\" id=\"radio" + i + "\" value=\"radio" + i + "\"/>" +
+			list.append("<input type=\"radio\" name=\"radio\" id=\"radio\"" + i + "\" value=\""+billing.crednum+"\""+ i + "\"/>" +
 			"<label for=\"radio" + i + "\">" + billing.crednum + "</label><br>"
 				);
 			}
 			list.listview("refresh");
-			// <input type="radio" name="radio" id="radio2" value="radio2"/>
-   //                       <label for="radio2">2</label>
 		},
 		error: function(data, textStatus, jqXHR){
 			console.log("textStatus: " + textStatus);
@@ -1284,22 +1313,21 @@ $(document).on('pagebeforeshow', "#order_page", function( event, ui ) {
 
 $(document).on('pagebeforeshow', "#invoice_page", function( event, ui ) {
 	$.ajax({
-		url : "http://localhost:3412/ICOM5016Srv/Invoice/" + selectedProduct.pid,
+		url : "http://localhost:3412/ICOM5016Srv/Invoice/" + selectedProduct.pid + "/" + currentOrder.orderid,
 		contentType: "application/json",
 		success : function(data, textStatus, jqXHR){
 			var invoiceInfo = data.invoice;
 			var shipping = data.shipping;
-			//alert(invoiceInfo.pname);
 			$("#invoiceid").empty();
     		$("#invoiceid").append("Invoice ID: " +  invoiceInfo.invid); 
     		$("#productname_invoice").empty();
-    		$("#productname_invoice").append("Product Name: " +  invoiceInfo.pname);
+    		$("#productname_invoice").append("Product Name: " +  selectedProduct.pname);
     		$("#pinstantprice_invoice").empty();
-    		$("#pinstantprice_invoice").append("Price: " +  invoiceInfo.pinstant_price);
+    		$("#pinstantprice_invoice").append("Price: " +  selectedProduct.pinstant_price);
     		$("#invoice_date").empty();
-    		$("#invoice_date").append("Invoice date: " +  invoiceInfo.invDate);
+    		$("#invoice_date").append("Invoice date: " +  invoiceInfo.invdate);
     		$("#due_date").empty();
-    		$("#due_date").append("Due date: " +  invoiceInfo.dueDate);
+    		$("#due_date").append("Due date: " +  invoiceInfo.duedate);
     		$("#payment_invoice").empty();
     		$("#payment_invoice").append("<p>" + "Credit #: " + invoiceInfo.crednum + " Sec Num: " + invoiceInfo.secnum +  "</p>" + 
 					"<p>" + "Exp Date: " + invoiceInfo.expdate + "</p>");
@@ -1572,7 +1600,7 @@ $(document).on('pagebeforeshow', "#invoice_page_cart", function( event, ui ) {
 			
 			list.append("<li><h5>Total Price: " + info.totalprice + "</h5></li>");
 
-			list.append("<li><h5>Invoice Date: " + info.invDate + "</h5><h5>Due Date: " + info.dueDate + "</h5></li>");
+			list.append("<li><h5>Invoice Date: " + info.invdate + "</h5><h5>Due Date: " + info.duedate + "</h5></li>");
 
 			list.append("<li><h5>Credit #: " + info.crednum + "</h5><h5>Sec Num: " + info.secnum + "</h5><h5>Exp Date: " + info.expdate + "</h5></li>");
 
@@ -1589,3 +1617,249 @@ $(document).on('pagebeforeshow', "#invoice_page_cart", function( event, ui ) {
 		}
 	});
 });
+
+
+
+
+
+
+
+
+
+
+var newCreditCardID = {};
+
+//get credit cards
+$(document).on('pagebeforeshow', "#credit_card", function( event, ui ) {
+    $.ajax({
+        url : "http://localhost:3412/ICOM5016Srv/getcreditcard/" + currentUser.userid,
+        contentType: "application/json",
+        success : function(data, textStatus, jqXHR){
+            CreditCard = data.creditcard;
+       
+
+            var CreditCardList = CreditCard;
+            var len = CreditCardList.length;
+            var list = $("#creditcard-list");
+            list.empty();
+            var payment;
+            for (var i=0; i < len; ++i){
+                cc = CreditCardList[i];   
+            list.append("<li>" +
+                    "<h2>" + "Credit #: " + cc.crednum + " Sec Num: " + cc.secnum +  "</h2>" +
+                    "<p>" + "Exp Date: " + cc.expdate + "</p>" +
+                    "</li>");
+            }
+            list.listview("refresh");
+
+           
+        },
+        error: function(data, textStatus, jqXHR){
+            console.log("textStatus: " + textStatus);
+           
+        }
+    });
+});
+
+//get shipping address
+$(document).on('pagebeforeshow', "#shipping_address", function( event, ui ) {
+    $.ajax({
+        url : "http://localhost:3412/ICOM5016Srv/getshippingaddress/" + currentUser.userid,
+        contentType: "application/json",
+        success : function(data, textStatus, jqXHR){
+            ShippingAddress = data.shipping_adress;
+   
+
+            var ShippingAddressList = ShippingAddress;
+            var len = ShippingAddressList.length;
+            var list = $("#shippingaddress-list");
+            list.empty();
+            var payment;
+           
+            for (var i=0; i < len; ++i){
+                sa = ShippingAddressList[i];   
+            list.append("<li>" +
+                    "<h2>" + "City: " + sa.city + " Neighborhood: " + sa.urb +  "</h2>" +
+                    "<p>" + "Street: " + sa.street + "</p>" +
+                    "</li>");
+            }
+            list.listview("refresh");
+ 
+           
+        },
+        error: function(data, textStatus, jqXHR){
+            console.log("textStatus: " + textStatus);
+           
+        }
+    });
+});
+
+
+
+
+
+function SaveCreditCard(){
+var temp1 = $("#crednum").val();
+var temp2 = $("#secnum").val();
+var temp3 = $("#expdate").val();
+if(temp1 == "" || temp2 == "" || temp3 == ""){
+alert("invalid input");   
+}
+else{
+$.mobile.loading("show");
+var form = $("#creditcard-form");
+var formData = form.serializeArray();
+console.log("form Data: " + formData);
+var newCreditCard = ConverToJSON(formData);
+console.log("New Credit Card: " + JSON.stringify(newCreditCard));
+var newCreditCardJSON = JSON.stringify(newCreditCard);
+$.ajax({
+url : "http://localhost:3412/ICOM5016Srv/addcreditcard/"+ currentUser.userid,
+method: 'post',
+data : newCreditCardJSON,
+contentType: "application/json",
+dataType:"json",
+success : function(data, textStatus, jqXHR){
+newCreditCardID = data.id;
+$.mobile.loading("hide");
+$.mobile.navigate("#add_billing_address");
+},
+error: function(data, textStatus, jqXHR){
+console.log("textStatus: " + textStatus);
+$.mobile.loading("hide");
+alert("Data could not be added!");
+}
+});
+}
+}
+
+
+function SaveShippingAddress(){
+var temp1 = $("#urb").val();
+var temp2 = $("#numhouse").val();
+var temp3 = $("#street").val();
+var temp4 = $("#city").val();
+var temp5 = $("#zipcode").val();
+var temp6 = $("#country").val();
+if(temp1 == "" || temp2 == "" || temp3 == ""|| temp4 == ""|| temp5 == ""|| temp6 == ""){
+alert("invalid input");   
+}
+else{
+$.mobile.loading("show");
+var form = $("#shippingaddress-form");
+var formData = form.serializeArray();
+console.log("form Data: " + formData);
+var newShippingAddress = ConverToJSON(formData);
+console.log("New Shipping Address: " + JSON.stringify(newShippingAddress));
+var newShippingAddressJSON = JSON.stringify(newShippingAddress);
+$.ajax({
+url : "http://localhost:3412/ICOM5016Srv/addshippingaddress/"+ currentUser.accountid,
+method: 'post',
+data : newShippingAddressJSON,
+contentType: "application/json",
+dataType:"json",
+success : function(data, textStatus, jqXHR){
+newShippingAddress = data.id;
+$.mobile.loading("hide");
+$.mobile.navigate("#profile_page");
+},
+error: function(data, textStatus, jqXHR){
+console.log("textStatus: " + textStatus);
+$.mobile.loading("hide");
+alert("Data could not be added!");
+}
+});
+}
+}
+
+
+function SaveBillingAddress(){
+var temp1 = $("#urb").val();
+var temp2 = $("#numhouse").val();
+var temp3 = $("#street").val();
+var temp4 = $("#city").val();
+var temp5 = $("#zipcode").val();
+var temp6 = $("#country").val();
+if(false){
+alert("invalid input");   
+}
+else{
+$.mobile.loading("show");
+var form = $("#billingaddress-form");
+var formData = form.serializeArray();
+console.log("form Data: " + formData);
+var newBillingAddress = ConverToJSON(formData);
+console.log("New Billing Address: " + JSON.stringify(newBillingAddress));
+var newBillingAddressJSON = JSON.stringify(newBillingAddress);
+$.ajax({
+url : "http://localhost:3412/ICOM5016Srv/addbillingaddress/"+ currentUser.accountid + "/" + newCreditCardID,
+method: 'post',
+data : newBillingAddressJSON,
+contentType: "application/json",
+dataType:"json",
+success : function(data, textStatus, jqXHR){
+
+$.mobile.loading("hide");
+$.mobile.navigate("#profile_page");
+},
+error: function(data, textStatus, jqXHR){
+console.log("textStatus: " + textStatus);
+$.mobile.loading("hide");
+alert("Data could not be added!");
+}
+});
+}
+}
+
+function putInCart(){
+
+$.mobile.loading("show");
+  
+    	
+	var pid = selectedProduct.pid;
+	var buyerid = currentUser.userid;
+
+
+
+$.ajax({
+		url : "http://localhost:3412/ICOM5016Srv/putCart/" + buyerid + "/" + pid,
+		method: 'get',
+		contentType: "application/json",
+		dataType:"json",
+		success : function(data, textStatus, jqXHR){
+			$.mobile.loading("hide");
+			alert("product successcully added to cart");
+		},
+		error: function(data, textStatus, jqXHR){
+			console.log("textStatus: " + textStatus);
+			$.mobile.loading("hide");
+			
+				alert("data not updated.");
+			
+		}
+	});
+
+
+   // $.ajax({
+      //  url : "http://localhost:3412/ICOM5016Srv/rating/" + rating + "/" + pid + "/" + sellerid + "/" + buyerid + "/" + price,
+       // contentType: "application/json",
+        //success : function(data, textStatus, jqXHR){
+          //  $.mobile.loading("hide");
+		//alert("success");
+	    //$.mobile.navigate("#home_page");
+        //},
+       // error: function(data, textStatus, jqXHR){
+         //   console.log("textStatus: " + textStatus);
+           // $.mobile.loading("hide");
+           // alert("Data could not be added!");
+        //}
+  //  });
+
+}
+
+
+
+
+
+
+

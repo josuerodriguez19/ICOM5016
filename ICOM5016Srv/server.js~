@@ -203,7 +203,7 @@ app.get('/ICOM5016Srv/categoriesTest', function(req, res) {
 //all the products where the cid from the category selected matches the cid of the product.
 
 app.get('/ICOM5016Srv/categories2/:categoryID', function(req, res) {
-	console.log("this is a test");
+	console.log("Browse Categories Start");
 	var id = req.params.categoryID;
 	var client = new pg.Client(conString);
 	client.connect();
@@ -229,6 +229,8 @@ app.get('/ICOM5016Srv/categories2/:categoryID', function(req, res) {
   				res.json(response);
   		}
  	});
+
+ 	console.log("Browse Categories End");
 });
 
 app.get('/ICOM5016Srv/bidHistory', function(req, res) {
@@ -322,13 +324,6 @@ app.get('/ICOM5016Srv/something', function(req, res) {
 });
 
 
-
-
-
-
-
-
-
 app.post('/ICOM5016Srv/bid', function(req, res) {
 	console.log("bidding on a product");
 
@@ -340,38 +335,54 @@ app.post('/ICOM5016Srv/bid', function(req, res) {
   	res.json(true);
 });
 
+//Added by Ramon
 app.post('/ICOM5016Srv/user1', function(req, res) {
-	console.log("POST 1");
-
+	console.log("Register User: Step 1 Start");
   	if(!req.body.hasOwnProperty('firstname') || !req.body.hasOwnProperty('lastname')
-  	|| !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('mail')) {
+  	|| !req.body.hasOwnProperty('phone')) {
     	res.statusCode = 400;
     	return res.send('Error: Missing fields for user.');
   	}
+  	var firstname = req.body.firstname;
+  	var lastname = req.body.lastname;
+  	var phone = req.body.phone;
+ 	var client = new pg.Client(conString);
+	client.connect();
+	var query1 = client.query("INSERT INTO users (firstname, lastname, phonenum) VALUES(\'" + firstname  +  "\',\'" + lastname  +"\',\'" + phone +"\')   RETURNING userid;");
+	query1.on("row", function (row, result) {
+		result.addRow(row);
 
-  	var newUser = new User(req.body.firstname, req.body.lastname, req.body.email, req.body.mail, "","","","","");
-  	newUser.id = userNextId++;
-  
-  	userList.push(newUser);
-  	res.json(true);
+	});
+	query1.on("end", function (result) {
+		var response = {"id" : result.rows[0].userid};
+		client.end();
+		res.json(response);
+ 	});
+	console.log("Register User: Step 1 End");	
 });
 
-app.post('/ICOM5016Srv/user2', function(req, res) {
-	console.log("POST 2");
-
-  	if(!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('password')) {
+app.post('/ICOM5016Srv/user2/:id', function(req, res) {
+	console.log("Register User: Step 2 Start");
+	var id = req.params.id;
+  	if(!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('password') || !req.body.hasOwnProperty('email')) {
     	res.statusCode = 400;
     	return res.send('Error: Missing fields for user.');
   	}
-	console.log("POST 3");
-	
-	var currentCar = userList.pop();
-	currentCar.username = req.body.username;
-	currentCar.password = req.body.password;
-	userList.push(currentCar);
-
-  
-  	res.json(true);
+	var username = req.body.username;
+  	var password = req.body.password;
+  	var email = req.body.email;
+ 	var client = new pg.Client(conString);
+	client.connect();
+	var query1 = client.query("INSERT INTO account (username, password, email, typeaccount, userid) VALUES(\'" + username  +  "\',\'" + password  +"\',\'" + email +"\', \'"+ "user" +"\', \'"+ id +"\')   RETURNING accountid;");
+	query1.on("row", function (row, result) {
+		result.addRow(row);
+	});
+	query1.on("end", function (result) {
+		var response = {"id" : result.rows[0].accountid};
+		client.end();
+		res.json(response);
+ 	});	
+  	console.log("Register User: Step 2 End");
 });
 
 app.post('/ICOM5016Srv/user3', function(req, res) {
@@ -516,8 +527,8 @@ var response = {"product" : theProduct};
 
 
 // REST Operation - HTTP POST to add a new product - JR 4/10/13
-app.post('/ICOM5016Srv/products', function(req, res) {
-
+app.post('/ICOM5016Srv/products/:id', function(req, res) {
+	console.log("Selling Form Start");
   	if(!req.body.hasOwnProperty('pName') || !req.body.hasOwnProperty('model')
   	|| !req.body.hasOwnProperty('brand') || !req.body.hasOwnProperty('dimensions')   
   	|| !req.body.hasOwnProperty('desc') || !req.body.hasOwnProperty('photo')
@@ -525,11 +536,29 @@ app.post('/ICOM5016Srv/products', function(req, res) {
     	res.statusCode = 400;
     	return res.send('Error: Missing fields for product.');
   	}
-  	var newProduct = new Product(req.body.pName, req.body.iPrice, req.body.bPrice, req.body.desc, req.body.model, req.body.photo, req.body.brand, req.body.dimensions );
-  	console.log("New Selling Product: " + JSON.stringify(newProduct));
-  	newProduct.id = productNextId++;
-  	productList.push(newProduct);
+  	var pname = req.body.pName;
+  	var pmodel = req.body.model;
+  	var pbrand = req.body.brand;
+  	var pdimensions = req.body.dimensions;
+  	var pdescription = req.body.desc;
+  	var pimage_filename = req.body.photo;
+  	var pinstant_price = req.body.iPrice;
+  	var userid = req.params.id;
+  	var myCat = req.body.select0;
+  	var auction2 = req.body.checkbox2;
+  	console.log(auction2);
+  	var auction3 = req.body.checkbox3;
+  	console.log(auction3);
+ 	var client = new pg.Client(conString);
+    client.connect();
+  	var query1 = client.query("INSERT INTO products (pname, pinstant_price, pmodel, pbrand, pdescription, pimage_filename, pdimensions, userid, pcategory, cid) VALUES(\'" + pname  +  "\',\'" + pinstant_price  +"\',\'" + pmodel +"\',\'" + pbrand +"\',\'" + pdescription +"\',\'" + pimage_filename +"\',\'" + pdimensions +"\',\'" + userid +"\',\'" + 1 +"\',\'" + myCat +"\');");
+	query1.on("row", function (row, result) {
+	});
+	query1.on("end", function (result) {
+		client.end();
+ 	});
   	res.json(true);
+  	console.log("Selling Form End");
 });
 
 // REST Operation - HTTP GET to read all selling products - JR 4/10/13
@@ -579,21 +608,79 @@ app.get('/Icom5016Srv/sellingproducts/:userid', function(req, res) {
 	
 });
 
+//fase3h
+app.get('/ICOM5016Srv/rating/:rate/:pid/:sellerid/:buyerid/:price', function(req, res) {
+  console.log("Entered rate");
+	var rate = req.params.rate;      
+	var pid = req.params.pid;
+	var sellerid = req.params.sellerid;
+	var buyerid = req.params.buyerid;
+	var price = req.params.price;
+	var orderid;
+	var avgrating;
+	console.log("post rate: " + rate + "" + pid + "" + sellerid + "" + buyerid + "" + price);
+	var client = new pg.Client(conString);
+	client.connect();
+	
+	var query1 = client.query("select orderid from orders where pid = '" + pid + "'");
+	query1.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query1.on("end", function (result) {
+		orderid = result.rows[0].orderid;
+		console.log("rate: " + rate );
+ 			console.log("orderid: " + orderid);
 
-app.post('/ICOM5016Srv/rating', function(req, res) {
-  
-      if(!req.body.hasOwnProperty('radio')) {
-        res.statusCode = 400;
-        console.log(req.body.radio);
-    
-        return res.send('Error: Missing fields for user.');
-      }
+var query2 = client.query("insert into productsold(pid, sellerid, buyerid,daysold, price, orderid, rating) VALUES('" + pid + "', '" + sellerid + "', '" +  buyerid + "', (select current_date), '" + price + "', '" + orderid + "', '" + rate + "')");
+	query2.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query2.on("end", function (result) {
+		
+		console.log("Add rating complete");
+ 		
+ 		
+			
+ 	});
 
-  //    var newUser = new User(req.body.firstname, req.body.lastname, req.body.email, req.body.mail, "","","","","");
-  //    newUser.id = userNextId++;
-  //    console.log("New LOL: " + JSON.stringify(newUser));
-  //    userList.push(newUser);
-      res.json(true);
+var query3 = client.query("select avg(rating) as avgrating from productsold where sellerid = '" + sellerid + "'");
+	query3.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query3.on("end", function (result) {
+		avgrating = result.rows[0].avgrating;
+		console.log("get avg for user complete");
+ 		
+	var query4 = client.query("UPDATE users SET avgrating = '" + avgrating + "' where userid = '" + sellerid + "'");
+	query4.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query4.on("end", function (result) {
+		
+		console.log("set avg for user complete");
+
+			
+ 	});	
+			
+ 	});
+var query5 = client.query("DELETE FROM products WHERE pid = '" + pid + "'");
+	query5.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query5.on("end", function (result) {
+		
+		console.log("set avg for user complete");
+ 		
+		
+ 		client.end();
+			
+ 	});	
+
+
+res.json(true);
+ 	});
+	
+	
 });
 
 
@@ -621,6 +708,24 @@ console.log("search");
   		res.json(response);
  	});
 });
+
+
+app.get('/ICOM5016Srv/selling_form_get_categories', function(req, res) {
+	console.log("Selling Form Get Categories Start");
+	var client = new pg.Client(conString);
+	client.connect();
+	var query = client.query("SELECT * from categories");
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		var response = {"categories" : result.rows};
+		client.end();
+  		res.json(response);
+ 	});
+ 	console.log("Selling Form Get Categories End");
+});
+
 //Added by Hector
 app.get('/ICOM5016Srv/movie/:id', function(req, res) {
 	var id = req.params.id;
@@ -1107,10 +1212,11 @@ app.get('/ICOM5016Srv/Order/:id/:uid', function(req, res) {
 	var uid = req.params.uid;
 	var order;
 	var billing;
+	// INSERT INTO users (firstname, lastname, phonenum) VALUES(\'" + firstname  +  "\',\'" + lastname  +"\',\'" + phone +"\')   RETURNING userid;"
 	console.log("order get start");
 	var client = new pg.Client(conString);
 	client.connect();
-	var query1 = client.query("SELECT * from products natural join orders where pid = $1", [id]);
+	var query1 = client.query("INSERT INTO orders (pid, accountid) VALUES(\'"+ id +"\', \'"+ uid +"\') RETURNING orderid, pid, accountid");
 	query1.on("row", function (row, result) {
     	result.addRow(row);
 	});
@@ -1136,14 +1242,15 @@ app.get('/ICOM5016Srv/Order/:id/:uid', function(req, res) {
 
 //added by Ramon
 //ESTO SIRVE LKJSLJGDLKGDFJGL
-app.get('/ICOM5016Srv/Invoice/:id', function(req, res) {
+app.get('/ICOM5016Srv/Invoice/:id/:orderid', function(req, res) {
 	console.log("invoice start");
 	var id = req.params.id;
+	var orderid = req.params.id;
 	var client = new pg.Client(conString);
 	var accountid;
 	var invoiceInfo;
 	client.connect();
-	var query = client.query("SELECT * from orders natural join invoice natural join products natural join creditcard natural join billing_adress where pid = $1", [id]);
+	var query = client.query("INSERT INTO invoice (orderid, duedate, invdate, billid, totalprice) VALUES(\'"+ orderid +"\', \'"+ "2013-06-20" +"\', \'"+ "2013-06-20" +"\', \'"+ 1 +"\', \'"+ 3.99 +"\') RETURNING invid, totalprice, billid, duedate, invdate ");
 	query.on("row", function (row, result) {
     	result.addRow(row);
 	});
@@ -1161,13 +1268,10 @@ app.get('/ICOM5016Srv/Invoice/:id', function(req, res) {
 		console.log("order end");
   		res.json(response);
  	});
-
-
-
  	});
 	
 
-
+	console.log("invoice end");
 });
 
 
@@ -1203,6 +1307,201 @@ app.get('/ICOM5016Srv/OrderCart/:userid', function(req, res) {
 
 
 
+
+
+
+
+
+
+
+app.post('/ICOM5016Srv/addcreditcard/:id', function(req, res) {
+var id = req.params.id;
+  
+console.log("Add Credit Card Start");
+  if(!req.body.hasOwnProperty('crednum') || !req.body.hasOwnProperty('secnum')
+  || !req.body.hasOwnProperty('expdate')) {
+    res.statusCode = 400;
+    return res.send('Error: Missing fields for user.');
+  }
+   
+  var crednum = req.body.crednum;
+  var secnum = req.body.secnum;
+  var expdate = req.body.expdate;
+ var client = new pg.Client(conString);
+client.connect();
+var query1 = client.query("INSERT INTO creditcard (accountid, crednum, secnum, expdate) VALUES(\'" + id  +  "\',\'" + crednum  +  "\',\'"  + secnum + "\',\'" + expdate +"\')   RETURNING credid, accountid;");
+query1.on("row", function (row, result) {
+result.addRow(row);
+   
+});
+query1.on("end", function (result) {
+var response = {"id" : result.rows[0].credid, "accountid" : result.rows[0].accountid};
+client.end();
+res.json(response);
+     });
+console.log("Credit Card Added");   
+});
+
+
+app.post('/ICOM5016Srv/addshippingaddress/:id', function(req, res) {
+
+var id = req.params.id;
+   
+console.log("Add Shipping Address Start");
+  if(!req.body.hasOwnProperty('urb') || !req.body.hasOwnProperty('numhouse')
+  || !req.body.hasOwnProperty('street') || !req.body.hasOwnProperty('city')
+  || !req.body.hasOwnProperty('zipcode') || !req.body.hasOwnProperty('country')) {
+    res.statusCode = 400;
+    
+    return res.send('Error: Missing fields for user.');
+  }
+    
+  var urb = req.body.urb;
+  var numhouse = req.body.numhouse;
+  var street = req.body.street;
+  var city = req.body.city;
+  var zipcode = req.body.zipcode;
+  var country = req.body.country;
+     var client = new pg.Client(conString);
+client.connect();
+var query1 = client.query("INSERT INTO shipping_adress (accountid, urb, numhouse, street, city, zipcode, country) VALUES(\'" + id  +  "\',\'" + urb  +  "\',\'"  + numhouse + "\',\'" + street + "\',\'" +  city +  "\',\'"  + zipcode + "\',\'" + country +"\')   RETURNING shipid;");
+query1.on("row", function (row, result) {
+result.addRow(row);
+   
+});
+query1.on("end", function (result) {
+var response = {"id" : result.rows[0].shipid};
+client.end();
+res.json(response);
+     });
+console.log("Shipping Address Added");   
+});
+
+app.post('/ICOM5016Srv/addbillingaddress/:id/:cdid', function(req, res) {
+
+var id = req.params.id;
+var cid = req.params.cdid;
+console.log("Add Billing Address Start");
+  if(!req.body.hasOwnProperty('urb') || !req.body.hasOwnProperty('numhouse')
+  || !req.body.hasOwnProperty('street') || !req.body.hasOwnProperty('city')
+  || !req.body.hasOwnProperty('zipcode') || !req.body.hasOwnProperty('country')) {
+    res.statusCode = 400;
+  
+    return res.send('Error: Missing fields for user.');
+  }
+    
+  var urb = req.body.urb;
+  var numhouse = req.body.numhouse;
+  var street = req.body.street;
+  var city = req.body.city;
+  var zipcode = req.body.zipcode;
+  var country = req.body.country;
+     var client = new pg.Client(conString);
+client.connect();
+var query1 = client.query("INSERT INTO billing_adress (accountid, urb, numhouse, street, city, zipcode, country, credid) VALUES(\'" + id  +  "\',\'" + urb  +  "\',\'"  + numhouse + "\',\'" + street + "\',\'" +  city +  "\',\'"  + zipcode + "\',\'" + country + "\',\'" + cid +"\')   RETURNING billid;");
+query1.on("row", function (row, result) {
+result.addRow(row);
+   
+});
+query1.on("end", function (result) {
+var response = {"id" : result.rows[0].billid};
+client.end();
+res.json(response);
+     });
+console.log("Billing Address Added");   
+});
+
+
+
+
+
+
+
+app.get('/ICOM5016Srv/getcreditcard/:id', function(req, res) {
+    var cc;
+
+    console.log("credit card star");
+    var id = req.params.id;
+    var client = new pg.Client(conString);
+    client.connect();
+console.log("credit card star1");
+    //CREDIT CARD QUERY
+    var query1 = client.query("SELECT * from creditcard natural join account where userid = $1", [id]);
+    query1.on("row", function (row, result) {
+        result.addRow(row);
+    });
+    console.log("credit card star2");
+    query1.on("end", function (result) {
+        console.log("credit card star5");
+        cc = result.rows;
+        console.log("credit card star6");
+        console.log(cc);
+        console.log("credit card star3");
+        var response = {"creditcard" : cc};
+        console.log(response);
+        console.log("credit card end");
+        client.end();
+          res.json(response);
+     });
+   
+
+});
+
+
+
+app.get('/ICOM5016Srv/getshippingaddress/:id', function(req, res) {
+    var cc;
+
+    console.log("shipping address star");
+    var id = req.params.id;
+    var client = new pg.Client(conString);
+    client.connect();
+console.log("credit card star1");
+    //CREDIT CARD QUERY
+    var query1 = client.query("SELECT * from shipping_adress natural join account where userid = $1", [id]);
+    query1.on("row", function (row, result) {
+        result.addRow(row);
+    });
+    console.log("credit card star2");
+    query1.on("end", function (result) {
+        console.log("credit card star5");
+        cc = result.rows;
+        console.log("credit card star6");
+        console.log(cc);
+        console.log("credit card star3");
+        var response = {"shipping_adress" : cc};
+        console.log(response);
+        console.log("shipping address end");
+        client.end();
+          res.json(response);
+     });
+   
+
+});
+
+
+app.get('/ICOM5016Srv/putCart/:buyerid/:pid', function(req, res) {
+	console.log("put in cart");
+	var client = new pg.Client(conString);
+	client.connect();
+	var buyerid = req.params.buyerid;
+	var pid = req.params.pid;
+	//this query needs to be changed accordingly
+	var query = client.query("insert into shopping_cart(pid,buyerid) VALUES('" + pid + "', '" + buyerid + "')");
+	query.on("row", function (row, result) {
+    	result.addRow(row);
+	});
+	query.on("end", function (result) {
+		
+		console.log("end put in cart");
+		client.end();
+  		res.json(true);
+ 	});
+});
+
+
 // Server starts running when listen is called.
 app.listen(process.env.PORT || 3412);
 console.log("server listening");
+
+

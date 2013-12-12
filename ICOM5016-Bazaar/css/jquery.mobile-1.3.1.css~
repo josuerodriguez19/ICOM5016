@@ -27,31 +27,6 @@
 	background-image:         linear-gradient( #3c3c3c /*{a-bar-background-start}*/, #111 /*{a-bar-background-end}*/);
 }
 
- .ui-content, .ui-footer {
-        position : absolute;
-    }
-
-
-
-    .ui-content {
-        top : 44px;
-        bottom : 44px;
-        left : 0;
-        right : 0;
-    }
-
-
-
-    .ui-content > div {
-        height : 100%;
-    }
-
-
-
-    .ui-footer {
-        bottom : 0;
-        width : 100%;
-    }
 
 
 .ui-bar-a,
@@ -3392,3 +3367,9 @@ div.ui-slider-switch.ui-mini {
 		display: none;
 	}	
 }
+
+/*#adminSign{
+     height: 40px;
+     width: 170px;
+margin-left: 550px;
+}*/

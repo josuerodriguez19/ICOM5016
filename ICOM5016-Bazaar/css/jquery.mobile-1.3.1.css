@@ -3368,6 +3368,23 @@ div.ui-slider-switch.ui-mini {
 	}	
 }
 
+/* Josue */
+.ui-navbar li .ui-btn .ui-btn-inner, .ui-navbar li .ui-btn {
+    border: 0 solid red !important;
+}
+
+body .ui-header .ui-title {
+ white-space: normal;
+}
+
+.ui-li .ui-btn-text a.ui-link-inherit { /* This are the added classes from jQuery mobile */
+    white-space: normal;                /* And this enables more than one line */
+}
+
+.ui-li-desc {
+    white-space: normal !important;
+}
+
 /*#adminSign{
      height: 40px;
      width: 170px;
